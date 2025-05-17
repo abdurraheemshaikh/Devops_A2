@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: online-event-booking-raheem
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: abdullahaslam007/cs4067-assignment-02-22i0777-abdurraheem-user-service:latest  # Ensure this image exists in your registry
+          ports:
+            - containerPort: 3001
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DATABASE_URL_USER
+            - name: DB_NAME
+              value: "userdb"
+            - name: JWT_SECRET
+              value: "your_secret_key"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: POSTGRES_PASSWORD
+            - name: DATABASE_URL_BOOKING
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DATABASE_URL_BOOKING
+            - name: DATABASE_URL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DATABASE_URL_USER
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+          imagePullPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: online-event-booking-raheem
+spec:
+  selector:
+    app: user-service
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
+  type: ClusterIP
