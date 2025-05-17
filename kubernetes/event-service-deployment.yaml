@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-service
+  namespace: online-event-booking-raheem
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-service
+  template:
+    metadata:
+      labels:
+        app: event-service
+    spec:
+      containers:
+        - name: event-service
+          image: abdullahaslam007/cs4067-assignment-02-22i0777-abdurraheem-event-service:latest  # Make sure you build & push this image correctly
+          ports:
+            - containerPort: 3002
+          env:
+            - name: MONGO_URL
+              value: "mongodb://mongo:27017/eventservicedb"
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-service
+  namespace: online-event-booking-raheem
+spec:
+  selector:
+    app: event-service
+  ports:
+    - protocol: TCP
+      port: 3002  # The service's external port
+      targetPort: 3002  # The container's internal port
+  type: ClusterIP

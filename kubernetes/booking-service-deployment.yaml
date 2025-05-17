@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service
+  namespace: online-event-booking-raheem
+  labels:
+    app: booking-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking-service
+  template:
+    metadata:
+      labels:
+        app: booking-service
+    spec:
+      containers:
+        - name: booking-service
+          image: abdullahaslam007/cs4067-assignment-02-22i0777-abdurraheem-booking-service:latest  # Change this to your actual Docker Hub image
+          ports:
+            - containerPort: 3003
+          env:
+            - name: DATABASE_URL_BOOKING
+              value: "postgres://postgres:678678@booking-db:5432/bookingdb"
+            - name: DATABASE_URL_USER
+              value: "postgres://postgres:678678@user-db:5432/userdb"
+            - name: EVENT_SERVICE_URL
+              value: "http://event-service:3002"
+            - name: RABBITMQ_HOST
+              value: "rabbitmq"
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-service
+  namespace: online-event-booking-raheem
+spec:
+  selector:
+    app: booking-service
+  ports:
+    - protocol: TCP
+      port: 3003
+      targetPort: 3003
+  type: ClusterIP

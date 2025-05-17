@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: online-event-booking-raheem
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: abdullahaslam007/cs4067-assignment-02-22i0777-abdurraheem-frontend:latest  # Replace with your actual Docker image
+          ports:
+            - containerPort: 3000
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: online-event-booking-raheem
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer  # Use LoadBalancer for external access (or NodePort if on Minikube)

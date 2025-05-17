@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 678678
+      POSTGRES_DB: userdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+    command: ["mongod", "--bind_ip_all"]
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://postgres:678678@postgres:5432/userdb
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  booking-service:
+    build: ./booking-service
+    container_name: booking-service
+    ports:
+      - "3003:3003"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://postgres:678678@postgres:5432/bookingdb
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "3004:3004"
+    depends_on:
+      - mongo
+    environment:
+      DATABASE_URL: mongodb://mongo:27017/notificationservicedb
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  event-service:
+    build: ./event-service
+    container_name: event-service
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mongo
+    environment:
+      DATABASE_URL: mongodb://mongo:27017/eventservicedb
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+
+volumes:
+  postgres-data:
+  mongo-data:

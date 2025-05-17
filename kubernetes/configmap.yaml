@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: online-event-booking-raheem
+data:
+  DATABASE_URL_BOOKING: "postgres://postgres:678678@booking-db:5432/bookingdb"
+  DATABASE_URL_USER: "postgres://postgres:678678@user-db:5432/userdb"
+  MONGO_URL: "mongodb://mongo:27017/eventservicedb"
+  EVENT_SERVICE_URL: "http://event-service:3002"
+  RABBITMQ_HOST: "rabbitmq"
